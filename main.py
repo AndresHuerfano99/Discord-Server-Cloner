@@ -5,6 +5,8 @@ import os
 import sys
 import subprocess
 import time
+import asyncio
+import traceback
 
 # Third-party imports
 try:
@@ -19,8 +21,6 @@ try:
     from rich.panel import Panel
     from rich.progress import Progress
     from rich.table import Table
-    import traceback
-    import asyncio
 except Exception as e:
     print(e)
 
@@ -28,6 +28,9 @@ except Exception as e:
 def loading(seconds: int) -> None:
     """
     Display a progress bar for the specified number of seconds.
+    
+    Args:
+        seconds (int): Duration for the progress bar in seconds.
     """
     with Progress() as progress:
         task = progress.add_task("Loading...", total=seconds)
@@ -38,12 +41,12 @@ def loading(seconds: int) -> None:
 
 def get_user_preferences() -> dict:
     """
-    Show default cloning preferences and allow the user to reconfigure them.
-
+    Display the default cloning preferences and allow the user to reconfigure them.
+    
     Returns:
         dict: A dictionary with cloning preferences.
     """
-    # Default preferences
+    # Default cloning preferences
     default_preferences = {
         'guild_edit': True,
         'channels_delete': True,
@@ -56,7 +59,7 @@ def get_user_preferences() -> dict:
     def map_boolean_to_string(value: bool) -> str:
         return "Yes" if value else "No"
 
-    # Prepare a panel content displaying current settings
+    # Prepare a panel displaying the current settings
     panel_content = "\n".join([
         f"- Change server name and icon: {map_boolean_to_string(default_preferences['guild_edit'])}",
         f"- Delete destination server channels: {map_boolean_to_string(default_preferences['channels_delete'])}",
@@ -111,10 +114,13 @@ async def main():
     """
     Main function for handling user input, authentication, and cloning operations.
     """
+    # Clear the console screen
     os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # Initialize Discord client
     client = discord.Client()
 
-    # Collect user input for token and server IDs
+    # Loop until valid token and server IDs are provided
     while True:
         token = input(f"{Style.BRIGHT}{Fore.MAGENTA}Insert your token to proceed:{Style.RESET_ALL}\n > ")
         guild_source = input(f"{Style.BRIGHT}{Fore.MAGENTA}Source server ID:{Style.RESET_ALL}\n > ")
@@ -134,6 +140,7 @@ async def main():
             os.system('cls' if os.name == 'nt' else 'clear')
             print(f"{Style.BRIGHT}{Fore.RED}Invalid input. Please re-enter values.{Style.RESET_ALL}")
 
+    # Get cloning preferences from user (or use defaults)
     preferences = get_user_preferences()
 
     @client.event
@@ -148,11 +155,11 @@ async def main():
             loading(5)
             os.system('cls' if os.name == 'nt' else 'clear')
 
-            # Retrieve guild objects from the provided IDs
+            # Retrieve guild objects using provided IDs
             guild_from = client.get_guild(int(guild_source))
             guild_to = client.get_guild(int(guild_dest))
 
-            # Perform cloning operations based on preferences
+            # Execute cloning operations according to user preferences
             if preferences.get('guild_edit'):
                 await Clone.guild_edit(guild_to, guild_from)
             if preferences.get('channels_delete'):
@@ -174,6 +181,7 @@ async def main():
             traceback.print_exc()
             restart()
 
+    # Start the Discord client
     try:
         await client.start(token)
     except discord.LoginFailure:
@@ -182,12 +190,10 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Install requirements.
+    # If requirements are not set via environment variable, execute the batch file and exit.
     if not os.getenv('requirements'):
         subprocess.Popen(['start', 'start.bat'], shell=True)
         sys.exit()
 
     os.system('cls' if os.name == 'nt' else 'clear')
     asyncio.run(main())
-
-#start
