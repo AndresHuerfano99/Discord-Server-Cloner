@@ -5,10 +5,7 @@ import os
 import sys
 import subprocess
 import time
-import asyncio
-import traceback
 
-# Third-party imports
 try:
     import platform
     import discord
@@ -21,6 +18,8 @@ try:
     from rich.panel import Panel
     from rich.progress import Progress
     from rich.table import Table
+    import asyncio
+    import traceback
 except Exception as e:
     print(e)
 
@@ -190,7 +189,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    # If requirements are not set via environment variable, execute the batch file and exit.
     if not os.getenv('requirements'):
         subprocess.Popen(['start', 'start.bat'], shell=True)
         sys.exit()

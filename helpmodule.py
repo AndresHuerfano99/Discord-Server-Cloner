@@ -4,7 +4,6 @@ import discord
 import requests
 from colorama import Fore, init, Style
 
-# Initialize colorama for colored terminal output
 init(autoreset=True)
 
 

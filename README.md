@@ -35,5 +35,3 @@
 ---
 
 Enjoy using **Discord Server Cloner**!
-
-
